@@ -25,7 +25,7 @@
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/RaviTejaGonnabathula/poker-bank-app.git
+git clone https://github.com/RaviTejaGonnabathula/AllInBank.git
 cd poker-bank-app
 ```
 ### 2. Create & activate virtual environment
