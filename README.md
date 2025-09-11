@@ -27,15 +27,19 @@
 ```bash
 git clone https://github.com/RaviTejaGonnabathula/poker-bank-app.git
 cd poker-bank-app
-
+```
 ### 2. Create & activate virtual environment
 
+```
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
-
+```
 ### 3. Install dependencies
+```
 pip install -r requirements.txt
-
+```
 
 ### 4. Run the Streamlit app
+```
 streamlit run poker_bank_app.py
+```
