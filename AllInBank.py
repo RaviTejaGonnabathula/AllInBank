@@ -21,8 +21,7 @@ Notes
 
 from __future__ import annotations
 import json
-from dataclasses import dataclass, field
-from typing import Dict, List, Tuple
+from typing import Dict
 from datetime import datetime
 from pathlib import Path
 
@@ -30,104 +29,7 @@ import pandas as pd
 import streamlit as st
 import altair as alt
 
-# ----------------------------
-# Data models
-# ----------------------------
-
-@dataclass
-class Player:
-    name: str
-    active: bool = True
-
-@dataclass
-class Ledger:
-    """Tracks money flows per player."""
-    buyins: Dict[str, float] = field(default_factory=dict)
-    cashouts: Dict[str, float] = field(default_factory=dict)
-
-    def add_buyin(self, player: str, amount: float) -> None:
-        self.buyins[player] = self.buyins.get(player, 0.0) + float(amount)
-
-    def set_cashout(self, player: str, amount: float) -> None:
-        """Replace the player's cash-out with an absolute amount."""
-        self.cashouts[player] = float(amount)
-
-    def add_cashout(self, player: str, amount: float) -> None:
-        """Add (increment) to the player's existing cash-out total."""
-        self.cashouts[player] = self.cashouts.get(player, 0.0) + float(amount)
-
-    def total_buyin(self) -> float:
-        return float(sum(self.buyins.values()))
-
-    def total_cashout(self) -> float:
-        return float(sum(self.cashouts.values()))
-
-    def balances(self, all_players: List[str]) -> Dict[str, float]:
-        """
-        Net balance for each player: cash_out - total_buy_in.
-        Positive => others owe them; Negative => they owe others.
-        Players with no entries are treated as 0 buyin & 0 cashout.
-        """
-        bal: Dict[str, float] = {}
-        for p in all_players:
-            b = self.buyins.get(p, 0.0)
-            c = self.cashouts.get(p, 0.0)
-            bal[p] = round(c - b, 2)
-        return bal
-
-# ----------------------------
-# Settlement algorithm (Greedy min cash flow)
-# ----------------------------
-
-def min_cash_flow_settlement(balances: Dict[str, float]) -> List[Tuple[str, str, float]]:
-    """
-    Given dict: name -> net (positive: is owed money; negative: owes money),
-    return list of transfers (debtor -> creditor, amount) that settle all balances.
-
-    Greedy approach:
-    - Repeatedly match the most negative with the most positive balance.
-    - Transfer min(abs(neg), pos). Update and continue until all within epsilon.
-    """
-    eps = 1e-9
-    debtors: List[Tuple[str, float]] = []
-    creditors: List[Tuple[str, float]] = []
-
-    for name, net in balances.items():
-        if net < -eps:
-            debtors.append((name, net))
-        elif net > eps:
-            creditors.append((name, net))
-
-    # Sort: debtors ascending (most negative first), creditors descending (most positive first)
-    debtors.sort(key=lambda x: x[1])  # more negative first
-    creditors.sort(key=lambda x: x[1], reverse=True)  # more positive first
-
-    i = 0
-    j = 0
-    transfers: List[Tuple[str, str, float]] = []
-
-    while i < len(debtors) and j < len(creditors):
-        d_name, d_amt = debtors[i]
-        c_name, c_amt = creditors[j]
-
-        pay = round(min(-d_amt, c_amt), 2)
-        if pay > 0:
-            transfers.append((d_name, c_name, pay))
-            d_amt += pay  # d_amt is negative
-            c_amt -= pay
-
-        # Move pointers
-        if d_amt >= -eps:
-            i += 1
-        else:
-            debtors[i] = (d_name, d_amt)
-
-        if c_amt <= eps:
-            j += 1
-        else:
-            creditors[j] = (c_name, c_amt)
-
-    return transfers
+from bank_core import Ledger, Player, min_cash_flow_settlement, normalize_player_name
 
 # ----------------------------
 # Save/Load helpers
@@ -257,12 +159,15 @@ add_col1, add_col2 = st.columns([0.6, 0.4])
 with add_col1:
     new_name = st.text_input("Add player name", placeholder="e.g., Alex")
 with add_col2:
-    if st.button("Add Player", use_container_width=True) and new_name.strip():
-        if new_name in players:
-            st.warning(f"Player '{new_name}' already exists.")
+    if st.button("Add Player", use_container_width=True):
+        normalized_name = normalize_player_name(new_name)
+        if not normalized_name:
+            st.warning("Please enter a player name.")
+        elif normalized_name in players:
+            st.warning(f"Player '{normalized_name}' already exists.")
         else:
-            players[new_name] = Player(name=new_name)
-            st.success(f"Added player {new_name}.")
+            players[normalized_name] = Player(name=normalized_name)
+            st.success(f"Added player {normalized_name}.")
 
 if players:
     names = list(players.keys())
