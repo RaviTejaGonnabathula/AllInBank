@@ -26,7 +26,7 @@ Access the app : [AllInBank](https://allinbank-jcbud6hkcut7jpyzp2spzn.streamlit.
 
 ```bash
 git clone https://github.com/RaviTejaGonnabathula/AllInBank.git
-cd poker-bank-app
+cd AllInBank
 ```
 ### 2. Create & activate virtual environment
 
@@ -41,7 +41,12 @@ pip install -r requirements.txt
 
 ### 4. Run the Streamlit app
 ```
-streamlit run poker_bank_app.py
+streamlit run AllInBank.py
+```
+
+### 5. Run the unit tests
+```
+pytest -q
 ```
 
 ## 🛠 Tech Stack
@@ -52,6 +57,7 @@ streamlit run poker_bank_app.py
 | Pandas      | Data manipulation        |
 | Altair      | Charts & visualizations  |
 | JSON        | Save/Load game states    |
+| Pytest      | Unit testing             |
 
 ---
 
@@ -62,6 +68,9 @@ streamlit run poker_bank_app.py
 3. Automatically compute net balances per player  
 4. Use **Greedy Min-Cash-Flow** algorithm to settle debts  
 5. **Download** game summary as `.json` or `.csv`  
+
+The core money flow logic (ledger, settlement, name normalization) lives in
+`bank_core.py` and is imported by the Streamlit UI so it can be tested independently.
 
 
 ---
@@ -124,6 +133,5 @@ To contribute:
 Made with ♠️ by **Ravi Teja Gonnabathula**  
 GitHub: [github.com/RaviTejaGonnabathula](https://github.com/RaviTejaGonnabathula)  
 LinkedIn: [linkedin.com/in/ravitejagonnabathula](https://www.linkedin.com/in/ravitejagonnabathula)  
-
 
 
