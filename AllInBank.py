@@ -38,6 +38,85 @@ from bank_core import Ledger, Player, min_cash_flow_settlement, normalize_player
 SAVE_DIR = Path.cwd() / "poker_bank_saves"
 SAVE_DIR.mkdir(exist_ok=True)
 
+
+def apply_theme() -> None:
+    st.markdown(
+        """
+        <style>
+            .stApp {
+                background: #f8fafc;
+                color: #111827;
+            }
+            .stApp,
+            .stApp p,
+            .stApp label,
+            .stApp div,
+            .stApp span,
+            .stApp li,
+            .stApp h1,
+            .stApp h2,
+            .stApp h3,
+            .stApp h4,
+            .stApp h5,
+            .stApp h6,
+            .stMarkdown,
+            .stCaption {
+                color: #111827;
+            }
+            [data-testid="stSidebar"] {
+                background: #eef2ff;
+                border-right: 1px solid #dbeafe;
+            }
+            [data-testid="stSidebar"] * {
+                color: #1f2937;
+            }
+            [data-testid="stMetric"] {
+                background: #ffffff;
+                border: 1px solid #e5e7eb;
+                border-radius: 12px;
+                padding: 0.75rem;
+            }
+            [data-testid="stMetricLabel"],
+            [data-testid="stMetricValue"] {
+                color: #111827;
+            }
+            [data-baseweb="input"] input,
+            [data-baseweb="base-input"] input,
+            textarea {
+                color: #111827 !important;
+                background-color: #ffffff !important;
+            }
+            [data-baseweb="select"] > div,
+            [data-baseweb="select"] span {
+                color: #111827 !important;
+                background-color: #ffffff !important;
+            }
+            .stDataFrame, .stTable {
+                background: #ffffff;
+                border: 1px solid #e5e7eb;
+                border-radius: 10px;
+            }
+            .hero-card {
+                background: linear-gradient(130deg, #dbeafe, #dcfce7);
+                border: 1px solid #bfdbfe;
+                border-radius: 14px;
+                padding: 0.9rem 1rem;
+                margin-bottom: 0.8rem;
+            }
+            .hero-card h3 {
+                margin: 0;
+                font-size: 1.25rem;
+                color: #1e3a8a;
+            }
+            .hero-card p {
+                margin: 0.2rem 0 0;
+                color: #1f2937;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
 def _safe_filename(name: str) -> str:
     return "".join(ch if ch.isalnum() or ch in ("-", "_") else "_" for ch in name.strip())
 
@@ -93,6 +172,7 @@ def load_game(filename: str):
 # ----------------------------
 
 st.set_page_config(page_title="AllInBank", page_icon="♠️", layout="wide")
+apply_theme()
 
 # Init session state
 if "players" not in st.session_state:
@@ -143,13 +223,26 @@ else:
 st.sidebar.button("💾 Save now", use_container_width=True, on_click=save_current_game)
 
 # Header
-colA, colB = st.columns([0.7, 0.3])
-with colA:
-    st.title("♠️ AllInBank")
-    st.caption("Track buy‑ins, rebuys, and cash‑outs. Save/Load and settle cleanly.")
-with colB:
+hero_left, hero_right = st.columns([0.75, 0.25])
+with hero_left:
+    st.markdown(
+        f"""
+        <div class="hero-card">
+            <h3>♠️ AllInBank · {settings['game_name']}</h3>
+            <p>Track buy-ins, rebuys, and cash-outs. Close every session with fair payouts.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+with hero_right:
     settings["game_name"] = st.text_input("Game name", value=str(settings["game_name"]), key="hdr_game_name")
     settings["currency"] = st.text_input("Currency symbol", value=str(settings["currency"]), key="hdr_currency")
+
+metric_1, metric_2, metric_3, metric_4 = st.columns(4)
+metric_1.metric("Players", len(players))
+metric_2.metric("Total Buy-ins", f"{settings['currency']}{ledger.total_buyin():.2f}")
+metric_3.metric("Total Cash-outs", f"{settings['currency']}{ledger.total_cashout():.2f}")
+metric_4.metric("Unmatched", f"{settings['currency']}{(ledger.total_cashout() - ledger.total_buyin()):.2f}")
 
 st.divider()
 
@@ -209,8 +302,13 @@ else:
         df_b_plot = pd.DataFrame({"Player": list(ledger.buyins.keys()), "Buyin": list(ledger.buyins.values())})
         chart_b = (
             alt.Chart(df_b_plot)
-            .mark_bar()
-            .encode(x=alt.X("Player:N", sort="-y"), y=alt.Y("Buyin:Q"), tooltip=["Player", "Buyin"])
+            .mark_bar(cornerRadiusTopLeft=6, cornerRadiusTopRight=6)
+            .encode(
+                x=alt.X("Player:N", sort="-y", axis=alt.Axis(labelAngle=0)),
+                y=alt.Y("Buyin:Q", title=f"Buy-ins ({settings['currency']})"),
+                color=alt.Color("Buyin:Q", scale=alt.Scale(scheme="blues"), legend=None),
+                tooltip=["Player", alt.Tooltip("Buyin:Q", format=".2f")],
+            )
             .properties(height=280, width=400)
         )
         st.altair_chart(chart_b, use_container_width=True)
@@ -302,6 +400,16 @@ if players:
     df_bal = pd.DataFrame([{ "Player": k, "Net": v } for k, v in bals.items()])
     df_bal.sort_values("Net", ascending=False, inplace=True)
 
+    biggest_winner = df_bal.iloc[0] if not df_bal.empty else None
+    biggest_payer = df_bal.iloc[-1] if not df_bal.empty else None
+    insight_col1, insight_col2 = st.columns(2)
+    with insight_col1:
+        if biggest_winner is not None:
+            st.info(f"🏆 Biggest winner: **{biggest_winner['Player']}** ({settings['currency']}{biggest_winner['Net']:.2f})")
+    with insight_col2:
+        if biggest_payer is not None:
+            st.info(f"💸 Biggest payer: **{biggest_payer['Player']}** ({settings['currency']}{biggest_payer['Net']:.2f})")
+
     cols1, cols2 = st.columns([0.5, 0.5])
     with cols1:
         st.markdown("**Net per player** (\+ means should receive, − means should pay)")
@@ -311,8 +419,13 @@ if players:
         if not df_bal.empty:
             chart_net = (
                 alt.Chart(df_bal)
-                .mark_bar()
-                .encode(x=alt.X("Player:N", sort=None), y=alt.Y("Net:Q"), color=alt.condition("datum.Net >= 0", alt.value("#4caf50"), alt.value("#f44336")), tooltip=["Player", "Net"])
+                .mark_bar(cornerRadiusTopLeft=6, cornerRadiusTopRight=6)
+                .encode(
+                    x=alt.X("Player:N", sort=None, axis=alt.Axis(labelAngle=0)),
+                    y=alt.Y("Net:Q", title=f"Net ({settings['currency']})"),
+                    color=alt.condition("datum.Net >= 0", alt.value("#22c55e"), alt.value("#ef4444")),
+                    tooltip=["Player", alt.Tooltip("Net:Q", format=".2f")],
+                )
                 .properties(height=300)
             )
             st.altair_chart(chart_net, use_container_width=True)
