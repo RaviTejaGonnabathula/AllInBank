@@ -44,61 +44,17 @@ def apply_theme() -> None:
         """
         <style>
             .stApp {
-                background: #f8fafc;
-                color: #111827;
-            }
-            .stApp,
-            .stApp p,
-            .stApp label,
-            .stApp div,
-            .stApp span,
-            .stApp li,
-            .stApp h1,
-            .stApp h2,
-            .stApp h3,
-            .stApp h4,
-            .stApp h5,
-            .stApp h6,
-            .stMarkdown,
-            .stCaption {
-                color: #111827;
-            }
-            [data-testid="stSidebar"] {
-                background: #eef2ff;
-                border-right: 1px solid #dbeafe;
-            }
-            [data-testid="stSidebar"] * {
-                color: #1f2937;
+                background: radial-gradient(circle at top right, #1f2937 0%, #111827 35%, #030712 100%);
             }
             [data-testid="stMetric"] {
-                background: #ffffff;
-                border: 1px solid #e5e7eb;
+                background: linear-gradient(135deg, rgba(30, 41, 59, 0.92), rgba(15, 23, 42, 0.92));
+                border: 1px solid rgba(148, 163, 184, 0.35);
                 border-radius: 12px;
                 padding: 0.75rem;
             }
-            [data-testid="stMetricLabel"],
-            [data-testid="stMetricValue"] {
-                color: #111827;
-            }
-            [data-baseweb="input"] input,
-            [data-baseweb="base-input"] input,
-            textarea {
-                color: #111827 !important;
-                background-color: #ffffff !important;
-            }
-            [data-baseweb="select"] > div,
-            [data-baseweb="select"] span {
-                color: #111827 !important;
-                background-color: #ffffff !important;
-            }
-            .stDataFrame, .stTable {
-                background: #ffffff;
-                border: 1px solid #e5e7eb;
-                border-radius: 10px;
-            }
             .hero-card {
-                background: linear-gradient(130deg, #dbeafe, #dcfce7);
-                border: 1px solid #bfdbfe;
+                background: linear-gradient(130deg, rgba(30, 58, 138, 0.65), rgba(22, 101, 52, 0.5));
+                border: 1px solid rgba(255, 255, 255, 0.12);
                 border-radius: 14px;
                 padding: 0.9rem 1rem;
                 margin-bottom: 0.8rem;
@@ -106,11 +62,10 @@ def apply_theme() -> None:
             .hero-card h3 {
                 margin: 0;
                 font-size: 1.25rem;
-                color: #1e3a8a;
             }
             .hero-card p {
                 margin: 0.2rem 0 0;
-                color: #1f2937;
+                color: #dbeafe;
             }
         </style>
         """,
