@@ -45,54 +45,12 @@ def apply_theme() -> None:
         <style>
             .stApp {
                 background: radial-gradient(circle at top right, #1f2937 0%, #111827 35%, #030712 100%);
-                color: #f8fafc;
-            }
-            .stApp,
-            .stApp p,
-            .stApp label,
-            .stApp div,
-            .stApp span,
-            .stApp li,
-            .stApp h1,
-            .stApp h2,
-            .stApp h3,
-            .stApp h4,
-            .stApp h5,
-            .stApp h6,
-            .stMarkdown,
-            .stCaption {
-                color: #e5e7eb;
-            }
-            [data-testid="stSidebar"] {
-                background: rgba(2, 6, 23, 0.92);
-            }
-            [data-testid="stSidebar"] * {
-                color: #e5e7eb;
             }
             [data-testid="stMetric"] {
                 background: linear-gradient(135deg, rgba(30, 41, 59, 0.92), rgba(15, 23, 42, 0.92));
                 border: 1px solid rgba(148, 163, 184, 0.35);
                 border-radius: 12px;
                 padding: 0.75rem;
-            }
-            [data-testid="stMetricLabel"],
-            [data-testid="stMetricValue"] {
-                color: #f8fafc;
-            }
-            [data-baseweb="input"] input,
-            [data-baseweb="base-input"] input,
-            textarea {
-                color: #f8fafc !important;
-                background-color: rgba(15, 23, 42, 0.85) !important;
-            }
-            [data-baseweb="select"] > div,
-            [data-baseweb="select"] span {
-                color: #f8fafc !important;
-                background-color: rgba(15, 23, 42, 0.85) !important;
-            }
-            .stDataFrame, .stTable {
-                background: rgba(15, 23, 42, 0.6);
-                border-radius: 10px;
             }
             .hero-card {
                 background: linear-gradient(130deg, rgba(30, 58, 138, 0.65), rgba(22, 101, 52, 0.5));
@@ -104,7 +62,6 @@ def apply_theme() -> None:
             .hero-card h3 {
                 margin: 0;
                 font-size: 1.25rem;
-                color: #ffffff;
             }
             .hero-card p {
                 margin: 0.2rem 0 0;
